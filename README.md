@@ -162,7 +162,7 @@ Your previously published APK stays available; the Action does not silently repl
 
 You may install the Action first. If no published APKDrop app exists for the signed GitHub repository, the Action fails safely with `status=setup-required`, exposes `setup-url`, and writes a direct setup link into the GitHub job summary.
 
-That link opens APKDrop with the current GitHub repository already filled in and starts the normal private preview flow. Nothing is published automatically. You inspect the result and explicitly publish once. After that, the same Action handles release-to-release synchronization.
+That link opens APKDrop with the current GitHub repository already filled in and starts the normal private preview flow. Nothing is published automatically. You inspect the result and explicitly publish once. Then **re-run the failed GitHub job once** to sync the release that triggered setup. After that, the same Action handles release-to-release synchronization automatically.
 
 **[Try APKDrop →](https://apkdrop.rawinstinctai.de/)**  
 **[See the 30-second setup page →](https://rawinstinctai.de/github-action)**
