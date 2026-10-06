@@ -15,10 +15,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Action runtime
         run: node --check action/index.js
+      - name: Test Action helpers
+        run: node --test action/index.test.js
       - name: Validate required Action files
         run: |
           test -f action.yml
           test -f action/index.js
+          test -f action/package.json
           test -f README.md
           test -f SECURITY.md
           test -f LICENSE

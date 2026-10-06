@@ -110,6 +110,8 @@ The Action waits for APKDrop by default and exposes useful release data:
 | `sha256` | APK SHA-256 |
 | `receipt-url` | Release Receipt |
 | `setup-url` | One-click first-run setup URL when the app is not connected yet |
+| `badge-markdown` | Ready-to-paste live proof badge for your GitHub README |
+| `latest-json-url` | Public APKDrop update API URL |
 | `status` | `queued`, `ready`, `setup-required` or `error` |
 
 Example:
@@ -123,6 +125,21 @@ Example:
 ```
 
 GitHub's job summary also gets a compact APKDrop result with version, page, APK, receipt and SHA-256.
+
+## Proof loop: let every release keep working for you
+
+After a successful sync, APKDrop also writes a ready-to-copy **live proof badge** into the GitHub job summary and exposes it as `badge-markdown`.
+
+Paste that badge into your repository README once:
+
+```yaml
+- name: Print proof badge
+  run: echo '${{ steps.apkdrop.outputs.badge-markdown }}'
+```
+
+The rendered badge reads APKDrop's current public verification state and links to the app's proof details. The link uses APKDrop's existing privacy-preserving `src=badge` source bucket — no user-level tracking or advertising profile.
+
+The Action also exposes `latest-json-url`, so your README, docs or updater can point to the same public release state without inventing another endpoint.
 
 ## One repository, multiple APKDrop apps
 

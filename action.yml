@@ -41,6 +41,10 @@ outputs:
     description: "APKDrop Release Receipt URL."
   setup-url:
     description: "One-click APKDrop setup URL when the repository is not connected yet."
+  badge-markdown:
+    description: "Ready-to-paste live proof badge Markdown for GitHub README files."
+  latest-json-url:
+    description: "Public APKDrop latest.json update API URL."
   status:
     description: "Final APKDrop state: queued, ready, setup-required, or error."
 

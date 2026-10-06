@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+const fs=require('node:fs');
 
 const input=name=>String(process.env['INPUT_'+name.toUpperCase().replaceAll('-','_')]||'').trim();
 const setOutput=(name,value)=>{
@@ -14,11 +14,21 @@ const fail=message=>{throw new Error(message)};
 class ApiError extends Error{
   constructor(message,status,data){super(message);this.name='ApiError';this.status=status;this.data=data||null;}
 }
-const repositorySetupUrl=()=>{
-  const repository=String(process.env.GITHUB_REPOSITORY||'').trim();
+const repositorySetupUrl=(repository=String(process.env.GITHUB_REPOSITORY||'').trim())=>{
+  repository=String(repository||'').trim();
   return repository&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)
     ? 'https://apkdrop.rawinstinctai.de/?repo='+encodeURIComponent('https://github.com/'+repository)
     : 'https://apkdrop.rawinstinctai.de/';
+};
+const proofArtifacts=(latest,queued={})=>{
+  const showcaseUrl=String(latest?.showcaseUrl||queued.showcaseUrl||'');
+  if(!showcaseUrl)return {badgeMarkdown:'',badgeUrl:'',proofUrl:'',latestJsonUrl:String(queued.latestUrl||'')};
+  const url=new URL(showcaseUrl),slug=String(queued.slug||url.pathname.split('/').filter(Boolean)[0]||'').trim();
+  const name=String(latest?.app?.appName||slug||'Android app').replace(/[\[\]]/g,'');
+  const badgeUrl=slug?`${url.origin}/api/${encodeURIComponent(slug)}/badge.svg?type=verified`:'';
+  const proofUrl=showcaseUrl+(showcaseUrl.includes('?')?'&':'?')+'src=badge#proof-details';
+  const badgeMarkdown=badgeUrl?`[![${name} on APKDrop](${badgeUrl})](${proofUrl})`:'';
+  return {badgeMarkdown,badgeUrl,proofUrl,latestJsonUrl:String(queued.latestUrl||'')};
 };
 
 async function jsonFetch(url,options={}){
@@ -97,10 +107,13 @@ async function main(){
       setOutput('download-url',latest.downloadUrl||'');
       setOutput('version',latest.version||'');
       setOutput('sha256',latest.sha256||'');
+      const proof=proofArtifacts(latest,queued);
       setOutput('receipt-url',latest.receiptUrl||'');
+      setOutput('badge-markdown',proof.badgeMarkdown);
+      setOutput('latest-json-url',proof.latestJsonUrl);
       setOutput('status','ready');
       console.log(`APKDrop bereit: v${latest.version||'?'} · ${latest.showcaseUrl||queued.showcaseUrl}`);
-      addSummary(`### APKDrop ✅\n\n- **Version:** ${latest.version||'—'}\n- **App:** [${queued.slug||'APKDrop'}](${latest.showcaseUrl||queued.showcaseUrl})\n- **APK:** [Download](${latest.downloadUrl||'#'})\n- **Release Receipt:** [Prüfnachweis](${latest.receiptUrl||'#'})\n- **SHA-256:** \`${latest.sha256||'—'}\``);
+      addSummary(`### APKDrop ✅\n\n- **Version:** ${latest.version||'—'}\n- **App:** [${queued.slug||'APKDrop'}](${latest.showcaseUrl||queued.showcaseUrl})\n- **APK:** [Download](${latest.downloadUrl||'#'})\n- **Release Receipt:** [Prüfnachweis](${latest.receiptUrl||'#'})\n- **Update API:** [latest.json](${proof.latestJsonUrl||'#'})\n- **SHA-256:** \`${latest.sha256||'—'}\`\n\n#### Live proof badge for your README\n\n\`\`\`md\n${proof.badgeMarkdown||'Badge unavailable'}\n\`\`\`\n\nThe badge stays current and opens APKDrop's factual proof details.\n\n[APKDrop GitHub Action](https://github.com/marketplace/actions/apkdrop-ship-android-apk)`);
       return;
     }
     await sleep(3000);
@@ -108,8 +121,12 @@ async function main(){
   fail('APKDrop Sync hat das Zeitlimit erreicht. Der Release wird im Hintergrund weiter verarbeitet.');
 }
 
-main().catch(error=>{
-  setOutput('status',error?.apkdropStatus||'error');
-  console.error('::error::'+String(error?.message||error));
-  process.exitCode=1;
-});
+if(require.main===module){
+  main().catch(error=>{
+    setOutput('status',error?.apkdropStatus||'error');
+    console.error('::error::'+String(error?.message||error));
+    process.exitCode=1;
+  });
+}
+
+module.exports={repositorySetupUrl,proofArtifacts,normalizedTag};
