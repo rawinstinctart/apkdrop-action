@@ -8,10 +8,14 @@
 
 ## Install in about 30 seconds
 
-**1. Connect your app once in APKDrop.**  
-Paste your GitHub repository or release into [APKDrop](https://apkdrop.rawinstinctai.de/), inspect the private draft, then publish the app when it is ready.
+**1. Add one workflow.**
 
-**2. Add one workflow.**
+You can do this before APKDrop is configured. If the first run cannot find a published APKDrop app for the repository, the Action returns a **one-click setup URL** with that repository already filled in.
+
+**2. Publish or connect the app once in APKDrop.**  
+Open the setup link from the GitHub job summary, inspect the private draft, then publish the app when it is ready.
+
+**3. Publish your next GitHub Release.**
 
 Create `.github/workflows/apkdrop.yml`:
 
@@ -35,10 +39,9 @@ jobs:
         uses: rawinstinctart/apkdrop-action@v1
 ```
 
-**3. Publish your next GitHub Release.**  
 APKDrop syncs the release, applies its normal APK selection and inspection pipeline, then keeps your existing public app page up to date.
 
-No checkout step. No APKDrop API token. No long-lived secret.
+No checkout step. No APKDrop API token. No long-lived secret. The first-run setup link is derived only from GitHub's signed repository identity.
 
 ## Why this Action exists
 
@@ -106,7 +109,8 @@ The Action waits for APKDrop by default and exposes useful release data:
 | `version` | Synced Android version |
 | `sha256` | APK SHA-256 |
 | `receipt-url` | Release Receipt |
-| `status` | `queued`, `ready` or `error` |
+| `setup-url` | One-click first-run setup URL when the app is not connected yet |
+| `status` | `queued`, `ready`, `setup-required` or `error` |
 
 Example:
 
@@ -154,11 +158,11 @@ The Action deliberately stops when APKDrop needs a human decision, for example:
 
 Your previously published APK stays available; the Action does not silently replace it with an uncertain candidate.
 
-## Before you install
+## First run before APKDrop is configured
 
-APKDrop currently expects the app to exist and already be published once. The first setup is intentionally visual: paste the repository into APKDrop, inspect the real private draft, then publish when the app page looks right.
+You may install the Action first. If no published APKDrop app exists for the signed GitHub repository, the Action fails safely with `status=setup-required`, exposes `setup-url`, and writes a direct setup link into the GitHub job summary.
 
-After that, this Action handles release-to-release synchronization.
+That link opens APKDrop with the current GitHub repository already filled in and starts the normal private preview flow. Nothing is published automatically. You inspect the result and explicitly publish once. Then **re-run the failed GitHub job once** to sync the release that triggered setup. After that, the same Action handles release-to-release synchronization automatically.
 
 **[Try APKDrop →](https://apkdrop.rawinstinctai.de/)**  
 **[See the 30-second setup page →](https://rawinstinctai.de/github-action)**

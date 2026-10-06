@@ -11,11 +11,20 @@ const addSummary=text=>{
 };
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const fail=message=>{throw new Error(message)};
+class ApiError extends Error{
+  constructor(message,status,data){super(message);this.name='ApiError';this.status=status;this.data=data||null;}
+}
+const repositorySetupUrl=()=>{
+  const repository=String(process.env.GITHUB_REPOSITORY||'').trim();
+  return repository&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)
+    ? 'https://apkdrop.rawinstinctai.de/?repo='+encodeURIComponent('https://github.com/'+repository)
+    : 'https://apkdrop.rawinstinctai.de/';
+};
 
 async function jsonFetch(url,options={}){
   const response=await fetch(url,options);
   let data=null;try{data=await response.json()}catch{}
-  if(!response.ok)fail(data?.error||data?.message||`Request failed (${response.status})`);
+  if(!response.ok)throw new ApiError(data?.error||data?.message||`Request failed (${response.status})`,response.status,data);
   return data;
 }
 function normalizedTag(value){return String(value||'').trim().replace(/^refs\/tags\//,'').replace(/^v(?=\d)/i,'');}
@@ -43,13 +52,27 @@ async function main(){
   const timeout=Math.max(15,Math.min(900,Number(input('timeout-seconds')||180)||180))*1000;
   const oidc=await githubOidcToken();
 
-  console.log(`APKDrop: synchronisiere ${process.env.GITHUB_REPOSITORY||'GitHub Repository'} …`);
-  const queued=await jsonFetch(endpoint+'/api/automation/sync',{
-    method:'POST',
-    headers:{Authorization:`Bearer ${oidc}`,'Content-Type':'application/json','User-Agent':'APKDrop-GitHub-Action/1'},
-    body:JSON.stringify(slug?{slug}:{})
-  });
+  const repository=String(process.env.GITHUB_REPOSITORY||'GitHub Repository');
+  console.log(`APKDrop: synchronisiere ${repository} …`);
+  let queued;
+  try{
+    queued=await jsonFetch(endpoint+'/api/automation/sync',{
+      method:'POST',
+      headers:{Authorization:`Bearer ${oidc}`,'Content-Type':'application/json','User-Agent':'APKDrop-GitHub-Action/1'},
+      body:JSON.stringify(slug?{slug}:{})
+    });
+  }catch(error){
+    if(error instanceof ApiError&&error.status===404){
+      const setupUrl=repositorySetupUrl();
+      setOutput('setup-url',setupUrl);
+      addSummary(`### APKDrop · einmalig einrichten\n\nFür **${repository}** gibt es noch keine veröffentlichte APKDrop-App.\n\n[APKDrop mit diesem Repository öffnen →](${setupUrl})\n\nDort siehst du zuerst die private Vorschau. Veröffentliche die App einmal und starte danach diesen fehlgeschlagenen GitHub-Job über **Re-run jobs** erneut. Dann wird auch der aktuelle Release übernommen; künftige Releases laufen automatisch.`);
+      error.apkdropStatus='setup-required';
+      error.message=`APKDrop ist für ${repository} noch nicht eingerichtet. Öffne einmal: ${setupUrl}`;
+    }
+    throw error;
+  }
   setOutput('showcase-url',queued.showcaseUrl||'');
+  setOutput('setup-url','');
   setOutput('status','queued');
 
   if(!shouldWait){
@@ -86,7 +109,7 @@ async function main(){
 }
 
 main().catch(error=>{
-  setOutput('status','error');
+  setOutput('status',error?.apkdropStatus||'error');
   console.error('::error::'+String(error?.message||error));
   process.exitCode=1;
 });

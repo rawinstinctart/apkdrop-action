@@ -39,8 +39,10 @@ outputs:
     description: "SHA-256 of the synced APK."
   receipt-url:
     description: "APKDrop Release Receipt URL."
+  setup-url:
+    description: "One-click APKDrop setup URL when the repository is not connected yet."
   status:
-    description: "Final APKDrop state."
+    description: "Final APKDrop state: queued, ready, setup-required, or error."
 
 runs:
   using: "node20"
