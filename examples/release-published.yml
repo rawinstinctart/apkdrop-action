@@ -1,0 +1,23 @@
+name: APKDrop
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  apkdrop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync APKDrop
+        id: apkdrop
+        uses: rawinstinctart/apkdrop-action@v1
+
+      - name: Show APKDrop result
+        run: |
+          echo "Page: ${{ steps.apkdrop.outputs.showcase-url }}"
+          echo "APK:  ${{ steps.apkdrop.outputs.download-url }}"
+          echo "SHA:  ${{ steps.apkdrop.outputs.sha256 }}"
