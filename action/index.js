@@ -65,7 +65,7 @@ async function main(){
     if(error instanceof ApiError&&error.status===404){
       const setupUrl=repositorySetupUrl();
       setOutput('setup-url',setupUrl);
-      addSummary(`### APKDrop · einmalig einrichten\n\nFür **${repository}** gibt es noch keine veröffentlichte APKDrop-App.\n\n[APKDrop mit diesem Repository öffnen →](${setupUrl})\n\nDort siehst du zuerst die private Vorschau. Nach der einmaligen Veröffentlichung synchronisiert derselbe Workflow künftige Releases automatisch.`);
+      addSummary(`### APKDrop · einmalig einrichten\n\nFür **${repository}** gibt es noch keine veröffentlichte APKDrop-App.\n\n[APKDrop mit diesem Repository öffnen →](${setupUrl})\n\nDort siehst du zuerst die private Vorschau. Veröffentliche die App einmal und starte danach diesen fehlgeschlagenen GitHub-Job über **Re-run jobs** erneut. Dann wird auch der aktuelle Release übernommen; künftige Releases laufen automatisch.`);
       error.apkdropStatus='setup-required';
       error.message=`APKDrop ist für ${repository} noch nicht eingerichtet. Öffne einmal: ${setupUrl}`;
     }
