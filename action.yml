@@ -1,5 +1,5 @@
 name: "APKDrop · Ship Android APK"
-description: "Sync a GitHub Release to APKDrop and return the verified Android download URL."
+description: "Ship GitHub Android releases to APKDrop with secretless OIDC and return verifiable APK links."
 author: "RawInstinctAI"
 
 branding:
