@@ -1,10 +1,11 @@
 # APKDrop · Ship Android APK
 
-**GitHub Release → APKDrop → clear Android download page with verifiable release facts.**
+**Android APK deployment from GitHub Releases — secretless GitHub Actions OIDC, stable download pages, SHA-256, signer continuity and release proof.**
 
-[Try APKDrop](https://apkdrop.rawinstinctai.de/) · [GitHub Marketplace](https://github.com/marketplace/actions/apkdrop-ship-android-apk) · [How it works](https://rawinstinctai.de/github-action)
+[Try APKDrop](https://rawinstinctai.de/go/action-try) · [GitHub Marketplace](https://rawinstinctai.de/go/marketplace) · [How it works](https://rawinstinctai.de/github-action)
 
 ![Action self-check](https://github.com/rawinstinctart/apkdrop-action/actions/workflows/ci.yml/badge.svg)
+[![Ship Android APKs with APKDrop](https://rawinstinctai.de/badge/github-action.svg)](https://rawinstinctai.de/go/developer-badge)
 
 ## Install in about 30 seconds
 
@@ -112,6 +113,7 @@ The Action waits for APKDrop by default and exposes useful release data:
 | `setup-url` | One-click first-run setup URL when the app is not connected yet |
 | `badge-markdown` | Ready-to-paste live proof badge for your GitHub README |
 | `latest-json-url` | Public APKDrop update API URL |
+| `developer-badge-markdown` | Optional "Ship Android APKs with APKDrop" discovery badge |
 | `status` | `queued`, `ready`, `setup-required` or `error` |
 
 Example:
@@ -140,6 +142,16 @@ Paste that badge into your repository README once:
 The rendered badge reads APKDrop's current public verification state and links to the app's proof details. The link uses APKDrop's existing privacy-preserving `src=badge` source bucket — no user-level tracking or advertising profile.
 
 The Action also exposes `latest-json-url`, so your README, docs or updater can point to the same public release state without inventing another endpoint.
+
+## Developer acquisition loop
+
+If you want other Android developers to find the same GitHub Release → APK workflow, the Action also exposes an **optional developer badge**:
+
+```md
+[![Ship Android APKs with APKDrop](https://rawinstinctai.de/badge/github-action.svg)](https://rawinstinctai.de/go/developer-badge)
+```
+
+The badge is never injected into your app page and never changes White-Label output. You choose whether to place it in your repository README. Its click path is measured only as an aggregate acquisition source — no user ID, cookie or advertising profile.
 
 ## One repository, multiple APKDrop apps
 
