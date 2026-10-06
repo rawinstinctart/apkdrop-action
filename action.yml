@@ -1,0 +1,47 @@
+name: "APKDrop · Ship Android APK"
+description: "Sync a GitHub Release to APKDrop and return the verified Android download URL."
+author: "RawInstinctAI"
+
+branding:
+  icon: "download-cloud"
+  color: "purple"
+
+inputs:
+  app:
+    description: "Optional APKDrop app slug. Required only when one repository powers multiple published APKDrop apps."
+    required: false
+    default: ""
+  endpoint:
+    description: "APKDrop service endpoint."
+    required: false
+    default: "https://apkdrop.rawinstinctart.workers.dev"
+  wait:
+    description: "Wait until APKDrop finishes the release inspection."
+    required: false
+    default: "true"
+  timeout-seconds:
+    description: "Maximum wait time for the release inspection."
+    required: false
+    default: "180"
+  release-tag:
+    description: "Optional expected GitHub release tag. When omitted, tag refs are detected automatically."
+    required: false
+    default: ""
+
+outputs:
+  showcase-url:
+    description: "Public APKDrop page."
+  download-url:
+    description: "Immutable APK download URL for the synced release."
+  version:
+    description: "Synced Android release version."
+  sha256:
+    description: "SHA-256 of the synced APK."
+  receipt-url:
+    description: "APKDrop Release Receipt URL."
+  status:
+    description: "Final APKDrop state."
+
+runs:
+  using: "node20"
+  main: "action/index.js"
