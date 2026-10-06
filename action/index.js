@@ -17,9 +17,10 @@ class ApiError extends Error{
 const repositorySetupUrl=(repository=String(process.env.GITHUB_REPOSITORY||'').trim())=>{
   repository=String(repository||'').trim();
   return repository&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)
-    ? 'https://apkdrop.rawinstinctai.de/?repo='+encodeURIComponent('https://github.com/'+repository)
-    : 'https://apkdrop.rawinstinctai.de/';
+    ? 'https://apkdrop.rawinstinctai.de/?repo='+encodeURIComponent('https://github.com/'+repository)+'&src=github-action-setup'
+    : 'https://rawinstinctai.de/go/action-try';
 };
+const developerBadgeMarkdown=()=>`[![Ship Android APKs with APKDrop](https://rawinstinctai.de/badge/github-action.svg)](https://rawinstinctai.de/go/developer-badge)`;
 const proofArtifacts=(latest,queued={})=>{
   const showcaseUrl=String(latest?.showcaseUrl||queued.showcaseUrl||'');
   if(!showcaseUrl)return {badgeMarkdown:'',badgeUrl:'',proofUrl:'',latestJsonUrl:String(queued.latestUrl||'')};
@@ -109,11 +110,13 @@ async function main(){
       setOutput('sha256',latest.sha256||'');
       const proof=proofArtifacts(latest,queued);
       setOutput('receipt-url',latest.receiptUrl||'');
+      const developerBadge=developerBadgeMarkdown();
       setOutput('badge-markdown',proof.badgeMarkdown);
+      setOutput('developer-badge-markdown',developerBadge);
       setOutput('latest-json-url',proof.latestJsonUrl);
       setOutput('status','ready');
       console.log(`APKDrop bereit: v${latest.version||'?'} · ${latest.showcaseUrl||queued.showcaseUrl}`);
-      addSummary(`### APKDrop ✅\n\n- **Version:** ${latest.version||'—'}\n- **App:** [${queued.slug||'APKDrop'}](${latest.showcaseUrl||queued.showcaseUrl})\n- **APK:** [Download](${latest.downloadUrl||'#'})\n- **Release Receipt:** [Prüfnachweis](${latest.receiptUrl||'#'})\n- **Update API:** [latest.json](${proof.latestJsonUrl||'#'})\n- **SHA-256:** \`${latest.sha256||'—'}\`\n\n#### Live proof badge for your README\n\n\`\`\`md\n${proof.badgeMarkdown||'Badge unavailable'}\n\`\`\`\n\nThe badge stays current and opens APKDrop's factual proof details.\n\n[APKDrop GitHub Action](https://github.com/marketplace/actions/apkdrop-ship-android-apk)`);
+      addSummary(`### APKDrop ✅\n\n- **Version:** ${latest.version||'—'}\n- **App:** [${queued.slug||'APKDrop'}](${latest.showcaseUrl||queued.showcaseUrl})\n- **APK:** [Download](${latest.downloadUrl||'#'})\n- **Release Receipt:** [Prüfnachweis](${latest.receiptUrl||'#'})\n- **Update API:** [latest.json](${proof.latestJsonUrl||'#'})\n- **SHA-256:** \`${latest.sha256||'—'}\`\n\n#### Live proof badge for your README\n\n\`\`\`md\n${proof.badgeMarkdown||'Badge unavailable'}\n\`\`\`\n\nThe badge stays current and opens APKDrop's factual proof details.\n\n#### Optional developer discovery badge\n\nIf you want other Android developers to discover the release workflow you use:\n\n\`\`\`md\n${developerBadge}\n\`\`\`\n\n[APKDrop GitHub Action](https://rawinstinctai.de/go/marketplace)`);
       return;
     }
     await sleep(3000);
@@ -129,4 +132,4 @@ if(require.main===module){
   });
 }
 
-module.exports={repositorySetupUrl,proofArtifacts,normalizedTag};
+module.exports={repositorySetupUrl,proofArtifacts,developerBadgeMarkdown,normalizedTag};
