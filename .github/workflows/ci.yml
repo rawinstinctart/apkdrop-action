@@ -21,6 +21,7 @@ jobs:
         run: |
           test -f action.yml
           test -f action/index.js
+          test -f action/package.json
           test -f README.md
           test -f SECURITY.md
           test -f LICENSE
